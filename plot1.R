@@ -6,7 +6,7 @@ NEI <- data.table(readRDS("summarySCC_PM25.rds"))
 # create table with sum of emissions by year
 sum_emission <- tapply(NEI$Emissions, NEI$year, sum) 
 
-# stop abbreviation in y axis (emissions)
+# stop abbreviation of large numbers in y axis (emissions)
 options(scipen = 100000)
 # make plot png file
 png("plot1.png", width = 480, height = 480)
