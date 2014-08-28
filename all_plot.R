@@ -20,7 +20,7 @@ dev.off()
 # Question 2
 
 # subsetting NEI data by specific value of fips column
-balt <- NEI[NEI$fips == "24510", ]
+balt <- NEI[fips == "24510", ]
 # make sum of emissions by year from the subset data
 balt_sum <- tapply(balt$Emissions, balt$year, sum)
 # creat plot png file
@@ -40,51 +40,64 @@ ggsave("plot3.png", width=8,height=8, dpi = 480)
 # Question 4
 
 # read new rds file
-scc <- readRDS("Source_Classification_Code.rds")
-# select all variables from column EI.Sector as "Comb" and "Coal" names 
-coal_comb <- sqldf("select * from scc where EI_Sector like '%Comb%Coal%'")
+scc <- data.table(readRDS("Source_Classification_Code.rds"))
+# select all variables from column EI.Sector as "Comb" and "Coal" like names
+# and select SCC column with this variables
+comb_coal <- scc[EI.Sector %in% grep("(Comb.*Coal)", EI.Sector, value = T), SCC]
 
-# Anothe example: 
-# coal_comb <- scc[scc$EI.Sector %in% grep("(Comb.*Coal)", scc$EI.Sector, ignore.case=T, value = T),]
+#--------------------------------------------------
+#  ALTERNATIVE
 
-# subset NEI data by variables from coal_comb$SCC column
-coal_NEI <- NEI[NEI$SCC %in% coal_comb$SCC,]
+#  comb_coal <- sqldf("select SCC from scc where EI_Sector like '%Comb%Coal%'")
+
+#--------------------------------------------------
+
+# subset NEI data by variables from coal_comb
+coal_NEI <- NEI[SCC %in% comb_coal,]
 # sum of emissions by year 
-sum_coal_NEI <- tapply(coal_NEI$Emissions, coal_NEI$year, sum)
-# stop abbreviation of y axis (emissions numbers)
+coal_NEI_sum <- tapply(coal_NEI$Emissions, coal_NEI$year, sum)
+# stop abbreviation of y axis (emissions values)
 options(scipen = 100000)
 # create boxplots from sum_coal_NEI
 png("plot4.png", width = 480, height = 480)
-barplot(sum_coal_NEI, col = c("darkblue"), main = "Coal combustion emissions in the USA", xlab = "Years", ylab = "Emissions in tons", cex.lab = 1.4)
+barplot(coal_NEI_sum, col = c("darkblue"), main = "Coal combustion emissions in the USA", xlab = "Years", ylab = "Emissions in tons", cex.lab = 1.4)
 dev.off()
 
 # Question 5
 
 # select motor vehicles from scc data frame from EI.Sector column by
 # variable "Mobile - On-Road"
-motor <- sqldf("select * from scc where EI_Sector like '%Mobile - On-Road%'")
+motor <- scc[EI.Sector %in% grep("(Mobile.*On.*Road)", EI.Sector, value = T), SCC]
+
+#------------------------------------------------------
+#  ALTERNATIVE
+
+# motor <- sqldf("select SCC from scc where EI_Sector like '%Mobile - On-Road%'")
+
+#------------------------------------------------------ 
+
 # subset motor vehicle data in Baltimore City
-motor_balt <- NEI[NEI$SCC %in% motor$SCC & NEI$fips == "24510",]
+motor_balt <- NEI[SCC %in% motor & fips == "24510",]
 # sum emissions from motor vehicles in Baltimore City by year
-sum_motor_balt <- tapply(motor_balt$Emissions, motor_balt$year, sum)
+motor_balt_sum <- tapply(motor_balt$Emissions, motor_balt$year, sum)
 # create plot
 png("plot5.png", width = 480, height = 480)
-barplot(sum_motor_balt, col = c("darkblue"), main = "Emissions from motor vehicles in Baltimore City", xlab = "Years", ylab = "Emissions in tons", cex.lab = 1.4)
+barplot(motor_balt_sum, col = c("darkblue"), main = "Emissions from motor vehicles in Baltimore City", xlab = "Years", ylab = "Emissions in tons", cex.lab = 1.4)
 dev.off()
 
 
 # Question 6
 
 # subset motor vehicle data in LA
-motor_LA <- NEI[NEI$SCC %in% motor$SCC & NEI$fips == "06037",]
+motor_LA <- NEI[SCC %in% motor & fips == "06037",]
 # sum emissions from motor vehicles in LA by year
-sum_motor_LA <- tapply(motor_LA$Emissions, motor_LA$year, sum)
+motor_LA_sum <- tapply(motor_LA$Emissions, motor_LA$year, sum)
 # create matrix from LA and Baltimore emissions sum data
-balt_LA_matrix <- rbind(sum_motor_balt, sum_motor_LA)
+balt_LA_bind <- rbind(motor_balt_sum, motor_LA_sum)
 # make barplot with special conditions
 png("plot6.png", width = 480, height = 480)
-balt_LA_plot <- barplot(balt_LA_matrix, beside = T, main = "Emissions from motor vehicles in LA and Baltimore City", ylab = "Emissions in tons", xlab = "Years")
-mtext(1, at = balt_LA_plot, text = c("Baltimore", "LA"), line = 0, cex = 0.8)
+balt_LA_bind <- barplot(balt_LA_bind, beside = T, main = "Emissions from motor vehicles in LA and Baltimore City", ylab = "Emissions in tons", xlab = "Years")
+mtext(1, at = balt_LA_bind, text = c("Baltimore", "LA"), line = 0, cex = 0.8)
 dev.off()
 
 
