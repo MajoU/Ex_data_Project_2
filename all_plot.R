@@ -32,10 +32,18 @@ dev.off()
 
 # Question 3
 
-balt_type <- ddply(balt, .(year, type), summarize, emissions = sum(Emissions))
+balt_type <- balt[, list(emissions = sum(Emissions)), by = c("year", "type")]
 g <- ggplot(balt_type, aes(year,emissions)) 
 g + geom_line(aes(color = type), size = 2) + geom_point() + labs(title = "Baltimore emissions from type of source") + labs(x = "Years", y = "Emissions in tons")
 ggsave("plot3.png", width=8,height=8, dpi = 480)
+
+#-----------------------------------------------------------------
+
+#  ALTERNATIVE
+
+# balt_type <- ddply(balt, .(year, type), summarize, emissions = sum(Emissions))
+
+#-----------------------------------------------------------------
 
 # Question 4
 
