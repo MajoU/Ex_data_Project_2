@@ -38,11 +38,9 @@ g + geom_line(aes(color = type), size = 2) + geom_point() + labs(title = "Baltim
 ggsave("plot3.png", width=8,height=8, dpi = 480)
 
 #-----------------------------------------------------------------
-
-#  ALTERNATIVE
+#  ALTERNATIVE LIKE PLYR
 
 # balt_type <- ddply(balt, .(year, type), summarize, emissions = sum(Emissions))
-
 #-----------------------------------------------------------------
 
 # Question 4
@@ -54,10 +52,9 @@ scc <- data.table(readRDS("Source_Classification_Code.rds"))
 comb_coal <- scc[EI.Sector %in% grep("(Comb.*Coal)", EI.Sector, value = T), SCC]
 
 #--------------------------------------------------
-#  ALTERNATIVE
+#  ALTERNATIVE THROUGH sqldf() package
 
 #  comb_coal <- sqldf("select SCC from scc where EI_Sector like '%Comb%Coal%'")
-
 #--------------------------------------------------
 
 # subset NEI data by variables from coal_comb
@@ -78,10 +75,9 @@ dev.off()
 motor <- scc[EI.Sector %in% grep("(Mobile.*On.*Road)", EI.Sector, value = T), SCC]
 
 #------------------------------------------------------
-#  ALTERNATIVE
+#  ALTERNATIVE THROUGH sqldf()
 
 # motor <- sqldf("select SCC from scc where EI_Sector like '%Mobile - On-Road%'")
-
 #------------------------------------------------------ 
 
 # subset motor vehicle data in Baltimore City
